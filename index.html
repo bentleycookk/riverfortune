@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>River Fortune — Casino</title>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: #f5f1e8;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #080a10;
+            display: grid;
+            place-items: center
+        }
+
+        body:before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            opacity: .22;
+            background: radial-gradient(circle at 50% 0%, #30462d, transparent 35%), linear-gradient(135deg, rgba(255, 255, 255, .025) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .025) 50%, rgba(255, 255, 255, .025) 75%, transparent 75%);
+            background-size: auto, 80px 80px;
+            pointer-events: none
+        }
+
+        .card {
+            position: relative;
+            width: min(850px, 92%);
+            padding: 46px;
+            background: #10131b;
+            border: 1px solid #303642;
+            border-radius: 20px;
+            box-shadow: 0 30px 100px #000;
+            z-index: 1
+        }
+
+        .brand {
+            text-align: center;
+            color: #f0bf48;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 5px
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 62px;
+            margin: 10px 0 8px;
+            letter-spacing: -3px
+        }
+
+        p {
+            text-align: center;
+            color: #858b99;
+            font-size: 14px;
+            margin: 0
+        }
+
+        .games {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-top: 34px
+        }
+
+        .game {
+            display: block;
+            text-decoration: none;
+            color: #eee;
+            background: #171b24;
+            border: 1px solid #303642;
+            border-radius: 13px;
+            padding: 27px 18px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 18px;
+            transition: .2s
+        }
+
+        .game:hover {
+            transform: translateY(-4px);
+            border-color: #f0bf48;
+            box-shadow: 0 14px 35px #f0bf4820
+        }
+
+        .game small {
+            display: block;
+            color: #747b89;
+            font-size: 11px;
+            font-weight: normal;
+            margin-top: 8px
+        }
+
+        footer {
+            text-align: center;
+            color: #555d69;
+            font-size: 10px;
+            margin-top: 28px
+        }
+
+        @media(max-width:560px) {
+            .card {
+                padding: 30px 18px
+            }
+
+            h1 {
+                font-size: 45px
+            }
+
+            .games {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="brand">♢ RIVER FORTUNE</div>
+        <h1>Casino</h1>
+        <p>Choose your game — all games use fictional virtual credits.</p>
+
+        <div class="games">
+            <a class="game" href="slots.html">🎰 SLOTS<small>Spin the reels</small></a>
+            <a class="game" href="blackjack.html">🃏 BLACKJACK<small>Play your hand</small></a>
+            <a class="game" href="roulette.html">🎡 ROULETTE<small>Place your bets</small></a>
+            <a class="game" href="plinko.html">🔴 PLINKO<small>Drop the ball</small></a>
+        </div>
+
+        <footer>RIVER FORTUNE • FICTIONAL DEMO • VIRTUAL CREDITS ONLY</footer>
+    </div>
+</body>
+
+</html>

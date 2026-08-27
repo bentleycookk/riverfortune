@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>River Fortune — Blackjack</title>
+    <style>
+        :root {
+            --gold: #f7c85a;
+            --gold2: #fff0a8;
+            --green: #073d2c;
+            --green2: #0b5b3f;
+            --black: #050706;
+            --red: #c83232;
+            --muted: #aeb8b2;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Georgia, "Times New Roman", serif;
+            background: #030504;
+            color: #fff
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 50% 20%, rgba(22, 111, 75, .28), transparent 35%),
+                radial-gradient(circle at 50% 100%, rgba(246, 188, 62, .09), transparent 40%),
+                #030504;
+            overflow-x: hidden;
+        }
+
+        body:before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .15;
+            background-image: linear-gradient(115deg, transparent 45%, rgba(255, 255, 255, .05) 50%, transparent 55%);
+            background-size: 9px 9px
+        }
+
+        header {
+            height: 82px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            border-bottom: 1px solid rgba(247, 200, 90, .25);
+            background: rgba(2, 7, 5, .88);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10
+        }
+
+        .logo {
+            font-size: 29px;
+            letter-spacing: 5px;
+            color: var(--gold);
+            text-shadow: 0 0 18px rgba(247, 200, 90, .25);
+            font-weight: bold
+        }
+
+        .logo span {
+            display: block;
+            font-size: 9px;
+            letter-spacing: 4px;
+            color: #b9c1bc;
+            text-align: center;
+            margin-top: 2px
+        }
+
+        .bank {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .balance {
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            color: #fff;
+            font-size: 20px
+        }
+
+        .coin {
+            width: 28px;
+            height: 28px;
+            border: 2px solid #f4cf69;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: #f4cf69;
+            font: bold 14px Arial;
+            box-shadow: 0 0 12px #b88823
+        }
+
+        main {
+            max-width: 1180px;
+            margin: auto;
+            padding: 28px 20px 60px
+        }
+
+        .statusbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
+            font-family: Arial, sans-serif
+        }
+
+        .status {
+            font-size: 13px;
+            color: #b9c5be;
+            letter-spacing: 1px
+        }
+
+        .status strong {
+            color: var(--gold)
+        }
+
+        .table {
+            position: relative;
+            min-height: 650px;
+            border: 2px solid #6d5725;
+            border-radius: 34px;
+            padding: 30px;
+            background:
+                radial-gradient(ellipse at center, rgba(20, 113, 73, .9), rgba(4, 56, 40, .98) 62%, #02291e 100%);
+            box-shadow: inset 0 0 70px rgba(0, 0, 0, .6), 0 25px 70px rgba(0, 0, 0, .45);
+            overflow: hidden;
+        }
+
+        .table:before {
+            content: "";
+            position: absolute;
+            inset: 15px;
+            border: 1px solid rgba(247, 200, 90, .18);
+            border-radius: 25px;
+            pointer-events: none
+        }
+
+        .oval {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 58%;
+            border: 1px solid rgba(255, 255, 255, .04);
+            border-radius: 50%;
+            pointer-events: none
+        }
+
+        .area {
+            position: relative;
+            z-index: 1
+        }
+
+        .label {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #d4ddd8;
+            font: 12px Arial, sans-serif;
+            margin: 8px 0 14px
+        }
+
+        .cards {
+            height: 175px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            perspective: 1000px
+        }
+
+        .card {
+            width: 104px;
+            height: 148px;
+            border-radius: 10px;
+            background: #f9f8f3;
+            color: #141414;
+            position: relative;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, .38);
+            border: 1px solid #ddd;
+            user-select: none;
+            transform-style: preserve-3d;
+            animation: deal .45s ease both;
+        }
+
+        .card.red {
+            color: #bd2424
+        }
+
+        .card .corner {
+            position: absolute;
+            top: 8px;
+            left: 9px;
+            font: bold 20px Arial;
+            line-height: 18px
+        }
+
+        .card .corner.bottom {
+            top: auto;
+            left: auto;
+            bottom: 8px;
+            right: 9px;
+            transform: rotate(180deg)
+        }
+
+        .card .suit {
+            position: absolute;
+            inset: 38px 0 0;
+            display: grid;
+            place-items: center;
+            font-size: 58px
+        }
+
+        .card.back {
+            background: repeating-linear-gradient(45deg, #0a2b23 0 5px, #174f3e 5px 10px);
+            border: 6px solid #f3efe2;
+            box-shadow: inset 0 0 0 2px #9c7b30, 0 12px 25px rgba(0, 0, 0, .38)
+        }
+
+        .card.back:after {
+            content: "R";
+            position: absolute;
+            inset: 13px;
+            border: 1px solid rgba(247, 200, 90, .55);
+            display: grid;
+            place-items: center;
+            color: #e5bb4e;
+            font: bold 30px Georgia
+        }
+
+        @keyframes deal {
+            from {
+                opacity: 0;
+                transform: translateY(-70px) rotateY(80deg) scale(.8)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .center {
+            height: 90px;
+            display: grid;
+            place-items: center;
+            text-align: center
+        }
+
+        .message {
+            font-size: 24px;
+            color: #f9e7a0;
+            text-shadow: 0 0 15px rgba(255, 214, 93, .18);
+            min-height: 34px
+        }
+
+        .result {
+            font: 13px Arial, sans-serif;
+            color: #c7d0cb;
+            margin-top: 5px
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 18px
+        }
+
+        button {
+            border: 1px solid #b18a35;
+            background: linear-gradient(#f7d46d, #c08b27);
+            color: #171207;
+            border-radius: 8px;
+            padding: 13px 25px;
+            font: bold 14px Arial, sans-serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #704c14, 0 10px 20px rgba(0, 0, 0, .25);
+            transition: .15s transform, .15s filter
+        }
+
+        button:hover:not(:disabled) {
+            filter: brightness(1.12);
+            transform: translateY(-2px)
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #704c14
+        }
+
+        button:disabled {
+            opacity: .35;
+            cursor: not-allowed
+        }
+
+        .info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            color: #c6cfca;
+            font: 12px Arial, sans-serif;
+            margin-top: 15px
+        }
+
+        .info b {
+            color: #fff
+        }
+
+        .flash {
+            animation: flash .55s ease
+        }
+
+        .win {
+            animation: win 1s ease
+        }
+
+        @keyframes flash {
+
+            0%,
+            100% {
+                filter: none
+            }
+
+            50% {
+                filter: brightness(1.9) drop-shadow(0 0 25px #f6cf5b)
+            }
+        }
+
+        @keyframes win {
+            0% {
+                box-shadow: inset 0 0 70px rgba(0, 0, 0, .6)
+            }
+
+            50% {
+                box-shadow: inset 0 0 100px rgba(247, 200, 90, .22), 0 0 35px rgba(247, 200, 90, .2)
+            }
+
+            100% {
+                box-shadow: inset 0 0 70px rgba(0, 0, 0, .6)
+            }
+        }
+
+        .particle {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background: #f6cf5b;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99;
+            animation: particle 900ms ease-out forwards
+        }
+
+        @keyframes particle {
+            to {
+                transform: translate(var(--x), var(--y)) scale(0);
+                opacity: 0
+            }
+        }
+
+        footer {
+            text-align: center;
+            color: #67716c;
+            font: 11px Arial, sans-serif;
+            margin-top: 20px;
+            line-height: 1.6
+        }
+
+        @media(max-width:650px) {
+            header {
+                padding: 0 15px
+            }
+
+            .logo {
+                font-size: 20px
+            }
+
+            .table {
+                padding: 18px 10px;
+                min-height: 610px
+            }
+
+            .card {
+                width: 78px;
+                height: 118px
+            }
+
+            .card .suit {
+                font-size: 43px
+            }
+
+            .card .corner {
+                font-size: 16px
+            }
+
+            .cards {
+                gap: 6px
+            }
+
+            .info {
+                gap: 12px
+            }
+
+            .message {
+                font-size: 19px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">RIVER FORTUNE<span>BLACKJACK ROOM</span></div>
+        <div class="bank">
+            <div class="coin">$</div>
+            <div class="balance" id="balance">$400</div>
+        </div>
+    </header>
+
+    <main>
+        <div class="statusbar">
+            <div class="status">TABLE <strong>BLACKJACK</strong> · 6-DECK SHOE</div>
+            <div class="status">BET <strong>$10</strong> · DIGITAL CREDITS</div>
+        </div>
+
+        <section class="table" id="table">
+            <div class="oval"></div>
+            <div class="area">
+                <div class="label">Dealer</div>
+                <div class="cards" id="dealerCards"></div>
+                <div class="center">
+                    <div>
+                        <div class="message" id="message">Place your bet to begin</div>
+                        <div class="result" id="result">Every new session starts with $400.</div>
+                    </div>
+                </div>
+                <div class="label">Player</div>
+                <div class="cards" id="playerCards"></div>
+                <div class="controls">
+                    <button id="deal">DEAL $10</button>
+                    <button id="hit" disabled>HIT</button>
+                    <button id="stand" disabled>STAND</button>
+                    <button id="reset">RESET $400</button>
+                </div>
+                <div class="info">
+                    <span>Player <b id="playerTotal">—</b></span>
+                    <span>Dealer <b id="dealerTotal">—</b></span>
+                    <span>Balance <b id="miniBalance">$400</b></span>
+                </div>
+            </div>
+        </section>
+        <footer>Demo digital-credit game. No real-money wagering, deposits, or cash-out. Outcomes use browser
+            cryptographic randomness.</footer>
+    </main>
+
+    <script>
+        "use strict";
+        const START = 400, BET = 10;
+        let balance = START, deck = [], player = [], dealer = [], inRound = false, busy = false;
+
+        const $ = id => document.getElementById(id);
+        function cryptoRandom(max) { return Math.floor((crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * max); }
+        function makeDeck() {
+            const suits = ["♠", "♥", "♦", "♣"], ranks = [
+                ["A", 11], ["2", 2], ["3", 3], ["4", 4], ["5", 5], ["6", 6], ["7", 7],
+                ["8", 8], ["9", 9], ["10", 10], ["J", 10], ["Q", 10], ["K", 10]
+            ];
+            let d = [];
+            for (let shoe = 0; shoe < 6; shoe++) for (const s of suits) for (const [r, v] of ranks) d.push({ s, r, v });
+            for (let i = d.length - 1; i > 0; i--) { let j = cryptoRandom(i + 1);[d[i], d[j]] = [d[j], d[i]] }
+            return d;
+        }
+        function draw() { if (!deck.length) deck = makeDeck(); return deck.pop() }
+        function total(hand) {
+            let t = hand.reduce((a, c) => a + c.v, 0), aces = hand.filter(c => c.r === "A").length;
+            while (t > 21 && aces--) { t -= 10 }
+            return t;
+        }
+        function renderCard(c, hidden = false) {
+            const el = document.createElement("div"); el.className = "card" + (hidden ? " back" : "");
+            if (!hidden) {
+                if (c.s === "♥" || c.s === "♦") el.classList.add("red");
+                el.innerHTML = `<div class="corner">${c.r}<br>${c.s}</div><div class="suit">${c.s}</div><div class="corner bottom">${c.r}<br>${c.s}</div>`;
+            }
+            return el;
+        }
+        function render() {
+            $("dealerCards").innerHTML = "";
+            dealer.forEach((c, i) => $("dealerCards").appendChild(renderCard(c, inRound && i === 1)));
+            $("playerCards").innerHTML = "";
+            player.forEach(c => $("playerCards").appendChild(renderCard(c)));
+            $("playerTotal").textContent = player.length ? total(player) : "—";
+            $("dealerTotal").textContent = dealer.length ? (inRound ? "?" : total(dealer)) : "—";
+            $("balance").textContent = "$" + balance;
+            $("miniBalance").textContent = "$" + balance;
+        }
+        function setMsg(m, r = "") { $("message").textContent = m; $("result").textContent = r }
+        function buttons(deal, hit, stand) { $("deal").disabled = !deal; $("hit").disabled = !hit; $("stand").disabled = !stand }
+        function particles() {
+            for (let i = 0; i < 34; i++) { const p = document.createElement("i"); p.className = "particle"; p.style.left = (innerWidth / 2) + "px"; p.style.top = "48%"; p.style.setProperty("--x", (Math.random() * 500 - 250) + "px"); p.style.setProperty("--y", (Math.random() * 420 - 210) + "px"); document.body.appendChild(p); setTimeout(() => p.remove(), 950) }
+        }
+        function flash() { $("table").classList.remove("flash", "win"); void $("table").offsetWidth; $("table").classList.add("flash") }
+        function settle(kind) {
+            inRound = false; busy = false;
+            if (kind === "win") { balance += BET * 2; setMsg("YOU WIN", `+$${BET} · Blackjack pays 3:2 when natural.`); particles(); $("table").classList.add("win") }
+            else if (kind === "blackjack") { balance += 25; setMsg("BLACKJACK!", `+$25 profit · natural blackjack paid 3:2.`); particles(); $("table").classList.add("win") }
+            else if (kind === "push") { balance += BET; setMsg("PUSH", `Your $${BET} bet was returned.`) }
+            else setMsg("DEALER WINS", `-$${BET}`);
+            render(); buttons(balance >= BET, true, false);
+        }
+        async function dealerTurn() {
+            inRound = false; render(); await wait(550);
+            while (total(dealer) < 17) { dealer.push(draw()); render(); flash(); await wait(600) }
+            const p = total(player), d = total(dealer);
+            if (d > 21) settle("win"); else if (p > d) settle("win"); else if (p < d) settle("lose"); else settle("push");
+        }
+        function wait(ms) { return new Promise(r => setTimeout(r, ms)) }
+        async function deal() {
+            if (busy || balance < BET) return;
+            busy = true; balance -= BET; deck = deck.length ? deck : makeDeck(); player = []; dealer = []; inRound = true;
+            setMsg("DEALING…", "A freshly randomized shoe is in play."); render(); buttons(false, false, false);
+            await wait(400); player.push(draw()); render(); await wait(400); dealer.push(draw()); render(); await wait(400); player.push(draw()); render(); await wait(400); dealer.push(draw()); render();
+            const p = total(player), d = total(dealer);
+            if (p === 21) {
+                if (d === 21) { settle("push") } else { inRound = false; balance += 35; setMsg("BLACKJACK!", `+$35 · 3:2 natural payout.`); particles(); $("table").classList.add("win"); render(); busy = false; buttons(balance >= BET, true, false) }
+                return;
+            }
+            setMsg("YOUR MOVE", `Player total: ${p}. Hit or stand.`);
+            busy = false; buttons(false, true, true);
+        }
+        async function hit() {
+            if (!inRound || busy) return; busy = true; player.push(draw()); render(); flash(); await wait(350);
+            const p = total(player);
+            if (p > 21) { inRound = false; busy = false; setMsg("BUST", `Player total ${p}. Dealer wins.`); render(); buttons(balance >= BET, true, false) }
+            else if (p === 21) { await dealerTurn() }
+            else { busy = false; setMsg("YOUR MOVE", `Player total: ${p}.`); buttons(false, true, true) }
+        }
+        async function stand() { if (!inRound || busy) return; busy = true; setMsg("DEALER TURN", "Dealer reveals the hole card."); await dealerTurn() }
+        $("deal").onclick = deal; $("hit").onclick = hit; $("stand").onclick = stand;
+        $("reset").onclick = () => { balance = START; deck = []; player = []; dealer = []; inRound = false; busy = false; setMsg("Place your bet to begin", "Every new session starts with $400."); render(); buttons(true, false, false) };
+        render(); buttons(true, false, false);
+    </script>
+</body>
+
+</html>

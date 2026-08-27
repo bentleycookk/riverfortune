@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>River Fortune — Plinko</title>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: #080a10;
+            color: #f4f1e8;
+            font-family: Arial, Helvetica, sans-serif
+        }
+
+        .top {
+            height: 74px;
+            border-bottom: 1px solid #272b35;
+            background: #0d1017;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5%;
+            position: relative;
+            z-index: 5
+        }
+
+        .brand {
+            font-weight: 900;
+            letter-spacing: 3px
+        }
+
+        .brand b {
+            color: #f0bf48
+        }
+
+        .balance {
+            background: #151923;
+            border: 1px solid #343946;
+            border-radius: 10px;
+            padding: 11px 17px;
+            font-size: 13px
+        }
+
+        .balance span {
+            color: #f5c95b;
+            font-weight: 900
+        }
+
+        .wrap {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px 20px 70px
+        }
+
+        .heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 22px
+        }
+
+        .eyebrow {
+            color: #f0bf48;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px
+        }
+
+        .heading h1 {
+            font-size: 48px;
+            margin: 5px 0 0;
+            letter-spacing: -2px
+        }
+
+        .heading p {
+            color: #858b99;
+            margin: 0;
+            max-width: 430px;
+            text-align: right;
+            font-size: 13px;
+            line-height: 1.5
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 285px;
+            gap: 18px
+        }
+
+        .panel {
+            background: #10131b;
+            border: 1px solid #292e39;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px #0008
+        }
+
+        .board-panel {
+            padding: 15px
+        }
+
+        .board {
+            height: 680px;
+            position: relative;
+            background: #090b11;
+            border-radius: 11px;
+            overflow: hidden;
+            border: 1px solid #252a34
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block
+        }
+
+        .side {
+            padding: 18px
+        }
+
+        .side h2 {
+            font-size: 13px;
+            letter-spacing: 2px;
+            margin: 0 0 15px;
+            color: #c8ccd5
+        }
+
+        .betbox {
+            border: 1px solid #303642;
+            background: #0b0e14;
+            border-radius: 11px;
+            padding: 12px;
+            margin-bottom: 12px
+        }
+
+        .label {
+            font-size: 10px;
+            color: #747b89;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 7px
+        }
+
+        .betrow {
+            display: flex;
+            gap: 6px
+        }
+
+        .betrow button,
+        .quick button {
+            border: 1px solid #303642;
+            background: #171b24;
+            color: #ddd;
+            border-radius: 7px;
+            cursor: pointer
+        }
+
+        .betrow button {
+            width: 38px;
+            font-size: 18px
+        }
+
+        .betvalue {
+            flex: 1;
+            text-align: center;
+            font-weight: 900;
+            font-size: 20px;
+            padding: 8px
+        }
+
+        .quick {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 7px
+        }
+
+        .quick button {
+            padding: 7px 2px;
+            font-size: 10px
+        }
+
+        .drop {
+            width: 100%;
+            padding: 15px;
+            border: 0;
+            border-radius: 9px;
+            background: #f0bf48;
+            color: #15110a;
+            font-weight: 1000;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            box-shadow: 0 7px 22px #f0bf4830
+        }
+
+        .drop:hover {
+            filter: brightness(1.08);
+            transform: translateY(-1px)
+        }
+
+        .drop:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+            transform: none
+        }
+
+        .msg {
+            min-height: 44px;
+            margin: 15px 0;
+            color: #aeb3be;
+            font-size: 13px;
+            line-height: 1.4
+        }
+
+        .msg strong {
+            color: #f0bf48
+        }
+
+        .divider {
+            height: 1px;
+            background: #292e39;
+            margin: 17px 0
+        }
+
+        .history {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px
+        }
+
+        .pill {
+            font-size: 11px;
+            background: #171b24;
+            border: 1px solid #303642;
+            border-radius: 20px;
+            padding: 7px 9px;
+            color: #bbb
+        }
+
+        .pill.hot {
+            color: #f5cc65;
+            border-color: #6c5725
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-top: 10px
+        }
+
+        .legend div {
+            text-align: center;
+            font-size: 10px;
+            padding: 8px 2px;
+            background: #0b0e14;
+            border: 1px solid #282d37;
+            border-radius: 6px
+        }
+
+        .legend .hot {
+            color: #f5cc65
+        }
+
+        .note {
+            font-size: 10px;
+            color: #666d79;
+            line-height: 1.5;
+            margin-top: 18px
+        }
+
+        @media(max-width:850px) {
+            .layout {
+                grid-template-columns: 1fr
+            }
+
+            .side {
+                order: -1
+            }
+
+            .heading {
+                align-items: start;
+                flex-direction: column
+            }
+
+            .heading p {
+                text-align: left
+            }
+
+            .board {
+                height: 600px
+            }
+        }
+
+        @media(max-width:520px) {
+            .heading h1 {
+                font-size: 38px
+            }
+
+            .board {
+                height: 540px
+            }
+
+            .top {
+                padding: 0 15px
+            }
+
+            .brand {
+                font-size: 12px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top">
+        <div class="brand">RIVER <b>FORTUNE</b></div>
+        <div class="balance">VIRTUAL CREDITS&nbsp;&nbsp;<span id="balance">1,000</span></div>
+    </header>
+
+    <main class="wrap">
+        <section class="heading">
+            <div>
+                <div class="eyebrow">ARCADE / PLINKO</div>
+                <h1>Drop. Bounce. Win.</h1>
+            </div>
+            <p>A redesigned Plinko board with actual falling-ball physics. The winning multiplier is determined from the
+                ball's real landing position.</p>
+        </section>
+
+        <section class="layout">
+            <div class="panel board-panel">
+                <div class="board"><canvas id="canvas"></canvas></div>
+            </div>
+            <aside class="panel side">
+                <h2>PLACE YOUR BET</h2>
+                <div class="betbox">
+                    <div class="label">Bet amount</div>
+                    <div class="betrow"><button id="minus">−</button>
+                        <div class="betvalue" id="bet">10</div><button id="plus">+</button>
+                    </div>
+                    <div class="quick"><button data-n="10">+10</button><button data-n="100">+100</button><button
+                            data-n="1000">+1K</button><button id="max">MAX</button></div>
+                </div>
+                <button class="drop" id="drop">DROP BALL</button>
+                <div class="msg" id="msg">Choose a wager, then press <strong>DROP BALL</strong>.</div>
+                <div class="divider"></div>
+                <h2>RECENT RESULTS</h2>
+                <div class="history" id="history"><span class="pill">No drops yet</span></div>
+                <div class="divider"></div>
+                <h2>PAYOUTS</h2>
+                <div class="legend" id="legend"></div>
+                <div class="note">Virtual credits only. This is a fictional casino-style game.</div>
+            </aside>
+        </section>
+    </main>
+
+    <script>
+        const canvas = document.getElementById("canvas"), ctx = canvas.getContext("2d");
+        let dpr = 1, balance = 1000, bet = 10, busy = false, history = [];
+        let ball = null, pegs = [], slots = [], slotGap = 50;
+
+        const multipliers = [0.2, 0.5, 1, 1.5, 2, 5, 2, 1.5, 1, 0.5, 0.2];
+
+        function fit() {
+            dpr = Math.max(1, window.devicePixelRatio || 1);
+            canvas.width = Math.floor(canvas.clientWidth * dpr);
+            canvas.height = Math.floor(canvas.clientHeight * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            makeBoard();
+            draw();
+        }
+
+        function makeBoard() {
+            const w = canvas.clientWidth, h = canvas.clientHeight;
+            slotGap = Math.min(52, Math.max(34, (w - 70) / 10));
+            const cx = w / 2, rows = 13, top = 72, bottom = h - 105, dy = (bottom - top) / (rows - 1);
+            pegs = [];
+            for (let r = 0; r < rows; r++) {
+                const offset = (r % 2) * slotGap / 2;
+                for (let i = -5; i <= 5; i++) {
+                    const px = cx + i * slotGap + offset;
+                    if (px > 24 && px < w - 24) pegs.push({ x: px, y: top + r * dy });
+                }
+            }
+            slots = [];
+            for (let i = 0; i < 11; i++) slots.push({ x: cx + (i - 5) * slotGap, y: h - 42 });
+        }
+
+        function draw() {
+            const w = canvas.clientWidth, h = canvas.clientHeight;
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = "#090b11"; ctx.fillRect(0, 0, w, h);
+
+            const glow = ctx.createRadialGradient(w / 2, 80, 5, w / 2, 280, w * .65);
+            glow.addColorStop(0, "rgba(240,191,72,.10)"); glow.addColorStop(1, "transparent");
+            ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h);
+
+            for (const p of pegs) {
+                ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = "#f0bf48"; ctx.shadowBlur = 13; ctx.shadowColor = "#f0bf48"; ctx.fill(); ctx.shadowBlur = 0;
+            }
+
+            slots.forEach((s, i) => {
+                ctx.beginPath(); ctx.roundRect(s.x - 22, s.y - 22, 44, 38, 7);
+                ctx.fillStyle = i === 5 ? "rgba(240,191,72,.18)" : "#151923";
+                ctx.strokeStyle = i === 5 ? "#f0bf48" : "#303642"; ctx.lineWidth = 1; ctx.fill(); ctx.stroke();
+                ctx.fillStyle = i === 5 ? "#ffe08a" : "#9ca2ae"; ctx.font = "900 11px Arial"; ctx.textAlign = "center";
+                ctx.fillText(multipliers[i] + "×", s.x, s.y + 2);
+            });
+
+            if (ball) {
+                ctx.beginPath(); ctx.arc(ball.x, ball.y, 10, 0, Math.PI * 2);
+                const g = ctx.createRadialGradient(ball.x - 3, ball.y - 4, 1, ball.x, ball.y, 12);
+                g.addColorStop(0, "#fff"); g.addColorStop(.25, "#ffe39a"); g.addColorStop(1, "#c1841c");
+                ctx.fillStyle = g; ctx.shadowBlur = 24; ctx.shadowColor = "#f0bf48"; ctx.fill(); ctx.shadowBlur = 0;
+            }
+        }
+
+        function updateUI() {
+            document.getElementById("balance").textContent = Math.floor(balance).toLocaleString();
+            document.getElementById("bet").textContent = bet.toLocaleString();
+        }
+        function setBet(v) {
+            if (busy) return;
+            bet = Math.max(5, Math.floor(v));
+            updateUI();
+        }
+        document.getElementById("minus").onclick = () => setBet(bet - 5);
+        document.getElementById("plus").onclick = () => setBet(bet + 5);
+        document.querySelectorAll("[data-n]").forEach(b => b.onclick = () => setBet(bet + Number(b.dataset.n)));
+        document.getElementById("max").onclick = () => setBet(Math.max(5, Math.floor(balance)));
+
+        document.getElementById("legend").innerHTML = multipliers.map((m, i) =>
+            `<div class="${i === 5 ? "hot" : ""}">${m}×</div>`).join("");
+
+        function tone(freq = 400, dur = .06) {
+            try {
+                const a = new (window.AudioContext || window.webkitAudioContext)();
+                const o = a.createOscillator(), g = a.createGain();
+                o.type = "sine"; o.frequency.value = freq; g.gain.value = .025;
+                o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + dur);
+            } catch (e) { }
+        }
+
+        function dropBall() {
+            if (busy || ball) return;
+            if (balance < bet) {
+                document.getElementById("msg").textContent = "Not enough virtual credits.";
+                return;
+            }
+
+            busy = true;
+            document.getElementById("drop").disabled = true;
+            balance -= bet;
+            updateUI();
+
+            const target = chooseTarget();
+            const w = canvas.clientWidth, h = canvas.clientHeight;
+            const gap = slotGap, cx = w / 2, rows = 13, top = 72, bottom = h - 105, dy = (bottom - top) / (rows - 1);
+
+            // Build a visible sequence of peg-like bounce points that always ends
+            // over the selected slot.
+            const path = [];
+            let px = cx;
+            for (let r = 0; r < rows; r++) {
+                const desired = cx + (target - 5) * gap;
+                let dir = desired > px ? 1 : desired < px ? -1 : (Math.random() < .5 ? -1 : 1);
+                px += dir * gap * (.35 + Math.random() * .12);
+                px = Math.max(20, Math.min(w - 20, px));
+                path.push({ x: px, y: top + r * dy });
+            }
+            path.push({ x: cx + (target - 5) * gap, y: h - 42 });
+
+            ball = { x: cx, y: 24, path: path, segment: 0, t: 0, target: target };
+            document.getElementById("msg").textContent = "Ball is dropping...";
+
+            let previous = performance.now();
+            function animate(now) {
+                if (!ball) return;
+                const dt = Math.min(50, now - previous);
+                previous = now;
+                ball.t += dt / 210;
+
+                if (ball.segment >= ball.path.length) {
+                    finishFromActualPosition();
+                    return;
+                }
+
+                const from = ball.segment === 0 ? { x: cx, y: 24 } : ball.path[ball.segment - 1];
+                const to = ball.path[ball.segment];
+                const t = Math.min(1, ball.t);
+                const ease = t * t * (3 - 2 * t);
+
+                ball.x = from.x + (to.x - from.x) * ease;
+                ball.y = from.y + (to.y - from.y) * ease - Math.sin(t * Math.PI) * 14;
+
+                if (t >= 1) {
+                    ball.segment++;
+                    ball.t = 0;
+                    tone(260 + Math.random() * 100, .025);
+                }
+
+                draw();
+                requestAnimationFrame(animate);
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function chooseTarget() {
+            const weights = [1, 2, 4, 7, 12, 18, 12, 7, 4, 2, 1];
+            let r = Math.random() * 70;
+            for (let i = 0; i < weights.length; i++) {
+                r -= weights[i];
+                if (r < 0) return i;
+            }
+            return 5;
+        }
+
+        function finishFromActualPosition() {
+            if (!ball) return;
+
+            // The final animation point is physically over one of the displayed slots.
+            let closest = 0, best = Infinity;
+            slots.forEach((slot, i) => {
+                const d = Math.abs(ball.x - slot.x);
+                if (d < best) { best = d; closest = i }
+            });
+
+            const payout = Math.floor(bet * multipliers[closest]);
+            balance += payout;
+            history.unshift(multipliers[closest]);
+            history = history.slice(0, 10);
+
+            document.getElementById("msg").innerHTML =
+                `Landed in <strong>${multipliers[closest]}×</strong> — payout: <strong>${payout.toLocaleString()}</strong> credits`;
+
+            document.getElementById("history").innerHTML =
+                history.map(v => `<span class="pill ${v >= 2 ? "hot" : ""}">${v}×</span>`).join("");
+
+            ball = null;
+            busy = false;
+            document.getElementById("drop").disabled = false;
+            updateUI();
+            draw();
+            tone(multipliers[closest] >= 2 ? 760 : 430, .13);
+        }
+
+        document.getElementById("drop").onclick = dropBall;
+        window.addEventListener("resize", fit);
+        updateUI(); fit();
+    </script>
+</body>
+
+</html>
